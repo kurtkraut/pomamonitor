@@ -16,24 +16,36 @@ briefdelay="60"
 #
 #
 #
+output ()
+{
+#Adiciona um timestamp ao echo
+time=$(date +%X)
+echo "($time) $*"
+}
+#Avisa ao usuário que o monitor está ativado.
 notify-send --icon=notification-network-ethernet-disconnected "Poor's Man Monitor" "Monitor ativado"
+output "Poor's Man Monitor - Monitor ativado"
 delay="$normaldelay"
+#Loop de checagem
 while [ 1 ]
 do
-echo "Aguardando $delay segundos para efetuar testes."
-sleep $delay
- echo Efetuando testes neste exato momento.
+ output "Aguardando $delay segundos para efetuar testes."
+ sleep $delay
+ output Efetuando testes neste exato momento.
  temporary=$(mktemp)
  fping -dAeu $targets > $temporary
  if test $? -eq 1
  then
   delay="$briefdelay"
-  echo "Pausa entre uma checagem e outra modificada para $delay segundos."
+  output "Pausa entre uma checagem e outra temporariamente modificada para $delay segundos."
   output=$(cat $temporary)
+  output "Dados coletados:"
   cat $temporary
   notify-send --urgency=critical --icon=notification-network-ethernet-disconnected "Host fora do ar" "$output"
  else
- rm $temporary
+  rm $temporary
+  delay="$normaldelay"
+  output Nenhum host detectado como offline.
  fi
- echo Teste concluído.
+ output Teste concluído.
 done
