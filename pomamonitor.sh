@@ -1,8 +1,24 @@
 #!/bin/dash
+#    Poor's Man Monitor - a simple host downtime alert for Gnome/KDE desktop
+#    Copyright (C) 2009 Kurt Kraut <development@kurtkraut.net>
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
 #
 #Preencha abaixo entre as aspas e separado por espaços os hosts que quer monitorar
 #
-targets="www.terra.com.br www.uol.com.br www.google.com www.opendns.com www.registro.br"
+targets="www.terra.com.br www.uol.com.br www.google.com www.opendns.com www.registro.br www.alemdonatural.com.br loja.alemdonatural.com.br NS3.EU.EDITDNS.NET NS5.US.EDITDNS.NET NS4.US.EDITDNS.NET remoto.alemdonatural.com.br"
 #
 #Indique abaixo, entre as aspas, o intervalo em segundos entre uma checagem e outra de todos os hosts supracitados
 #
