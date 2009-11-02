@@ -1,0 +1,45 @@
+Poor's Man Monitor Changelog
+"""""" """ """"""" """""""""
+
+For detailed and up to date data, please access http://code.google.com/p/pomamonitor/
+
+This version changes
+"""" """"""" """""""
+             - Using the the term 'checks' instead of 'tests' to the attemps to check if a host is online.
+             - Now checks are done through all network cards, including wireless, not only the default route (fping -m).
+             - More indented code (a twitter.com/turicas suggestion).
+             - Now pomamonitor.conf requires the usage of quotes to values.
+             - The pomamonitor.conf content is directly injected to pomamonitor.sh, without parsing. We'll all grown up men. (a twitter.com/turicas suggestion).
+             - Now first check are done in $brief_delay, not in 5 seconds anymore. This should give enough time to a wireless connection to be up for the first check.
+             - Instead of alerting user it is running, pomamonitor only does a notify-send after the first check, telling if a host is down or if they're all online.
+             - The $counter variable, that stores the number of times that checks were already done in the current run is more widely outputed.
+             - The $targets_qty variable, that stores the number of targets to monitor was created and is widely outputed.
+
+Previous versions
+"""""""" """"""""
+changeset:   5:af65e8491bff
+date:        Sun Nov 01 04:23:59 2009 -0200
+changes:     Translated pomamonitor.conf to english.
+
+changeset:   4:e45df4113700
+date:        Sun Nov 01 04:15:40 2009 -0200
+changes:     - Now using a conf file instead of making changes on source code.
+             - If on the first check everything is OK, user is warned that all hosts are online.
+             - New flags: --version and --help
+
+changeset:   3:9bde396e8332
+date:        Thu Oct 29 04:46:40 2009 -0200
+changes:     Added GPLv3 to the source code.
+
+changeset:   2:5621494f19cf
+date:        Thu Oct 29 03:46:04 2009 -0200
+changes:     Now default targets are ignore if new targets are provided in syntax and first ping starts with 5 seconds delay.
+
+changeset:   1:021a5511019c
+date:        Wed Oct 28 23:40:51 2009 -0200
+changes:     Fixed a simple bug: it was getting stuck with briefdelay value. Now buffer outputs are timestamped.
+
+changeset:   0:087f6dd90339
+date:        Wed Oct 28 18:42:52 2009 -0200
+changes:     First working release. Testing with ping only.
+
