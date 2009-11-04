@@ -5,7 +5,16 @@ For detailed and up to date data, please access http://code.google.com/p/pomamon
 
 This version changes
 """" """"""" """""""
-             - Using the the term 'checks' instead of 'tests' to the attemps to check if a host is online.
+             - Detects if a host is being handled by guide.opendns.com, what indicates it is offline. Important for OpenDNS.com users.
+             - Now grep is a dependency for pomamonitor.
+             - Now bind9-host (the 'host' command) is a dependency for pomamonitor.
+             - fping wasn't outputing all errors he got. This as fixed by adding 2>&1 to the syntax.
+
+Previous versions
+"""""""" """"""""
+changeset:   6:27f9da6f2c44
+date:        Mon Nov 02 04:09:48 2009 -0200
+changes:     - Using the the term 'checks' instead of 'tests' to the attemps to check if a host is online.
              - Now checks are done through all network cards, including wireless, not only the default route (fping -m).
              - More indented code (a twitter.com/turicas suggestion).
              - Now pomamonitor.conf requires the usage of quotes to values.
@@ -15,8 +24,7 @@ This version changes
              - The $counter variable, that stores the number of times that checks were already done in the current run is more widely outputed.
              - The $targets_qty variable, that stores the number of targets to monitor was created and is widely outputed.
 
-Previous versions
-"""""""" """"""""
+
 changeset:   5:af65e8491bff
 date:        Sun Nov 01 04:23:59 2009 -0200
 changes:     Translated pomamonitor.conf to english.

@@ -15,12 +15,61 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
+default_online_message()
+{
+if test -n "$opendns_failed_hosts"
+then
+    notify-send --urgency=low --icon=notification-network-ethernet-disconnected "Poor's Man Monitor check nº $counter" "All hosts are online and responding, except: $opendns_failed_hosts"
+    clioutput "All hosts are online and responding, except: $opendns_failed_hosts"
+else
+    notify-send --urgency=low --icon=notification-network-ethernet-connected "Poor's Man Monitor check nº $counter" "All $targets_qty hosts are online and responding. New checks will be done on every $delay seconds."
+    clioutput "All $targets_qty hosts are online and responding. New checks will be done on every $delay seconds."
+fi
+}
+
+nondefault_online_message()
+{
+if test -n "$opendns_failed_hosts"
+then
+    notify-send --urgency=low --icon=notification-network-ethernet-disconnected "Poor's Man Monitor check nº $counter" "All hosts are online and responding, except: $opendns_failed_hosts"
+    clioutput "All hosts are online and responding, except: $opendns_failed_hosts"
+else
+    notify-send --urgency=low --icon=notification-network-ethernet-connected "Poor's Man Monitor check nº $counter" "All hosts are online and responding. New checks will be done on every $delay seconds on: $targets"
+fi
+}
+
 clioutput ()
 {
 #Adiciona um timestamp ao echo. Forma padrão de stdout.
 time=$(date +%X)
 echo "($time) $*"
 }
+
+opendns_check () {
+#Caso os servidores do OpenDNS.com sejam usados no sistema, isso gera falso-negativo pois ele responde com ping para alvos com DNS offline ou hosts inexistentes. Para evitar esses falsos-negativos, essa checagem é feita.
+temporary_opendns=$(mktemp)
+unset opendns_failed_hosts
+echo $targets | tr " " \\n > $temporary_opendns
+while read line
+do
+#Tentando detectar IPs de 208.69.32.130 a 208.69.32.139
+    host $line | grep --fixed-strings --silent "208.69.32.13"
+    if test $? -eq 0
+    then
+#O $delay não é alterado para $brief_delay pois dificilmente esta situação mudará em tão pouco tempo.
+       opendns_failed_hosts="$line $opendns_failed_hosts"
+    fi
+done < $temporary_opendns
+if test -n "$opendns_failed_hosts"
+then
+    notify-send --urgency=critical --icon=notification-network-ethernet-disconnected "Poor's Man Monitor" "Aparentely, some hosts does not exist or their DNS servers stopped responding. You have to check this situation manually for: $opendns_failed_hosts"
+   clioutput "Aparentely, some hosts does not exist or their DNS servers stopped responding. You have to check this situation manually for: $opendns_failed_hosts"
+else
+   clioutput "No host from target list seem to be handled by guide.opendns.com"
+   fi
+rm $temporary_opendns
+}
+
 #--help flag
 if test "$1" = "--help"
 then
@@ -40,6 +89,7 @@ $0 www.google.com www.opendns.com www.kernel.org
 "
     exit 0
 fi
+
 #--version flag
 if test "$1" = "--version"
 then
@@ -86,10 +136,12 @@ do
     counter=$(expr $counter + 1)
     clioutput "Waiting $delay seconds to perform the check nº $counter."
     sleep $delay
-    clioutput "Making a check right now."
+    clioutput "Checking if a target is being handled by guide.opendns.com to avoid false-negative."
+    opendns_check
+    clioutput "Performing check nº $counter"
     temporary=$(mktemp)
-    fping -dAmeu $targets > $temporary
-    if test $? -eq 1
+    fping -dAmeu $targets > $temporary 2>&1
+    if test $? != 0
     then
 #Se houver pelo menos um host offline:
         delay="$brief_delay"
@@ -103,16 +155,16 @@ do
 #Se todos os hosts online:
         rm $temporary
         clioutput "All $targets_qty are online on check nº $counter."
-#Se for o primeiro teste ou algum host estava offline no último teste, avisar via notify-send que está todos hosts estão online.
-        if test $counter -eq 1 -o $delay = $brief_delay
+#Se for o primeiro teste ou algum host estava offline no último teste ($delay = $brief_delay), avisar via notify-send que está todos hosts estão online. Os hosts mantidos por guide.opendns.com também conduzirão até este trecho de código pois também respondem ping.
+        if test $counter -eq 1 -o $delay = $brief_delay -o -n "$opendns_failed_hosts" 
         then
             if test -z $1
             then
                 delay="$normal_delay"
-                notify-send --urgency=low --icon=notification-network-ethernet-connected "Poor's Man Monitor" "All $targets_qty hosts are online and responding. New checks will be done on every $delay seconds."
+                default_online_message
             else
                 delay="$normal_delay"
-                notify-send --urgency=low --icon=notification-network-ethernet-connected "Poor's Man Monitor" "All hosts are online and responding. New checks will be done on every $delay seconds on: $targets"
+                nondefault_online_message
             fi
         fi
     fi
