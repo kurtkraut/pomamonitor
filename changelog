@@ -5,13 +5,22 @@ For detailed and up to date data, please access http://code.google.com/p/pomamon
 
 This version changes
 """" """"""" """""""
-             - Detects if a host is being handled by guide.opendns.com, what indicates it is offline. Important for OpenDNS.com users.
+             - Increased timeout for ping attemps from 10 seconds to 60 seconds. Useful for avoiding false-positives on unreliable conections (like dial up , GPRS or bloated uplink).
+             - Pomamonitor will check if it has access to the needed binaries on load. This will avoid running with missing dependencies.
+             - Now zenity is a dependency for pomamonitor.
+             - If no configuration file is detected, a GUI wizard made with zenity will ask for configuration data.
+
+Previous versions
+"""""""" """"""""
+changeset:   7:6598baf7d31a
+date:        Wed Nov 04 16:44:09 2009 -0200
+changes:     - Detects if a host is being handled by guide.opendns.com, what indicates it is offline. Important for OpenDNS.com users.
              - Now grep is a dependency for pomamonitor.
              - Now bind9-host (the 'host' command) is a dependency for pomamonitor.
              - fping wasn't outputing all errors he got. This as fixed by adding 2>&1 to the syntax.
 
-Previous versions
-"""""""" """"""""
+
+
 changeset:   6:27f9da6f2c44
 date:        Mon Nov 02 04:09:48 2009 -0200
 changes:     - Using the the term 'checks' instead of 'tests' to the attemps to check if a host is online.

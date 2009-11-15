@@ -15,8 +15,123 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
-default_online_message()
+clioutput ()
 {
+#Adiciona um timestamp ao echo. Forma padrão de stdout.
+time=$(date +%X)
+echo "($time) $*"
+}
+#Checando a existência dos binários que serão utilizados.
+mktemp_path=$(whereis -b mktemp | cut -d" " -f 2)
+fping_path=$(whereis -b fping | cut -d" " -f 2)
+grep_path=$(whereis -b grep | cut -d" " -f 2)
+notify_send_path=$(whereis -b notify-send | cut -d" " -f 2)
+host_path=$(whereis -b host | cut -d" " -f 2)
+zenity_path=$(whereis -b zenity | cut -d" " -f 2)
+if test -x $mktemp_path
+then
+    clioutput "Binary $mktemp_path will be used."
+else
+    clioutput "Fatal error: mktemp is not installed or accessible. Poor's Man Monitor needs access to mktemp."
+    exit 1
+fi
+if test -x $fping_path
+then
+    clioutput "Binary $fping_path will be used."
+else
+    clioutput "Fatal error: fping is not installed or accessible. Poor's Man Monitor needs access to fping."
+    exit 1
+fi
+if test -x $grep_path
+then
+    clioutput "Binary echo $grep_path will be used."
+else
+    clioutput "Fatal error: grep is not installed or accessible. Poor's Man Monitor needs access to grep."
+    exit 1
+fi
+if test -x $notify_send_path
+then
+    clioutput "Binary $notify_send_path will be used."
+else
+    clioutput "Fatal error: notify-send is not installed or accessible. Poor's Man Monitor needs access a binary called 'notify-send'."
+    exit 1
+fi
+if test -x $host_path
+then
+    clioutput "Binary $host_path will be used."
+else
+    clioutput "Fatal error: host is not installed or accessible. Poor's Man Monitor needs access to a binary called 'host'."
+    exit 1
+fi
+if test -x $zenity_path
+then
+    clioutput "Binary $zenity_path will be used."
+else
+    clioutput "Fatal error: host is not installed or accessible. Poor's Man Monitor needs access to zenity."
+    exit 1
+fi
+#Checando se zenity_conf_maker foi abortado
+zenity_error_check(){
+if test $? -eq 1
+then
+    zenity --error --text="You've cancelled the Poor's Man Monitor first run settings. You need to complete this process in order to use Poor's Man Monitor. You may run this later."
+    exit 1
+fi
+}
+#Criando arquivo de configuração caso ele não exista
+zenity_conf_maker(){
+zenity --title="Read before using Poor's Man Monitor" --question --text="This is the first time you run Poor's Man Monitor. In order to make it run, you will need to answer 3 questions:\\
+\\
+1) All hosts or IPs you want to monitor, separated by space.\\
+2) The delay (in minutes) between each check if a host in the item 1 is online or offline.\\
+3) If a host is detected as offline, a briefer delay between each check on item 2.\\
+\\
+Please note that each question will be done in a different window.If you are not ready to answer these questions, you should cancel this window and run Poor's Man Monitor later.\\
+\\
+If you are ready to answer then just click on OK."
+if test $? -eq 1
+then
+    exit 0
+fi
+targets=$(zenity --title="Setting targets" --entry --text="Put below the hosts or IP addresses you want to monitor if they are offline,\\
+separated by a single space. It is recommended to keep at least 3 reliable\\
+hosts in the list that are usually online and responding to pings.\\
+Three reliable targets are already filled for you as an example.\\
+\\
+You may enter up to hundreds of targets." --entry-text="www.google.com www.opendns.com www.registro.br")
+zenity_error_check
+normal_delay=$(zenity --scale --title="Setting a delay" --text "We call a check when Poor's Man Monitor pings all targets that you have provided\\
+in the last question. Here you will set a delay (in minutes) between each check.\\
+\\
+A delay of 5 minutes is recommended." --min-value=3  --step 1 --value=5 --max-value=120)
+zenity_error_check
+brief_delay=$(zenity --scale --title="Setting a brief delay" --text "If a target is detected as offline, it is important to make briefer checks to\\
+be sure it is truly offline and to be alerted sooner when it is back online. Set\\
+below a brief delay in minutes.\\
+\\
+A brief delay off 1 minute is recommended" --min-value=1  --step 1 --value=1 --max-value=$normal_delay)
+zenity_error_check
+#Convertendo de minutos para segundos
+normal_delay=$(expr $normal_delay \* 60)
+brief_delay=$(expr $brief_delay \* 60)
+#Gravando dados coletados no $config_file
+echo "targets=\"$targets\"" > $config_file
+echo "normal_delay=$normal_delay" >> $config_file
+echo "brief_delay=$brief_delay" >> $config_file
+zenity --question --title="Poor's Man Monitor configuration finished." --text="You have finished configuring Poor's Man Monitor. If you want to change orr review the settings, just edit the file $config_file\\
+\\
+Now Poor's Man Monitor will be loaded."
+}
+#Definindo arquivo de configuração e checando se há permissão para leitura.
+config_file=~/.pomamonitor/pomamonitor.conf
+if test -r $config_file
+then
+    clioutput "Using the configuration file $config_file"
+else
+    zenity_conf_maker
+fi
+#Alertas ao usuário
+default_online_message(){
 if test -n "$opendns_failed_hosts"
 then
     notify-send --urgency=low --icon=notification-network-ethernet-disconnected "Poor's Man Monitor check nº $counter" "All hosts are online and responding, except: $opendns_failed_hosts"
@@ -27,8 +142,7 @@ else
 fi
 }
 
-nondefault_online_message()
-{
+nondefault_online_message(){
 if test -n "$opendns_failed_hosts"
 then
     notify-send --urgency=low --icon=notification-network-ethernet-disconnected "Poor's Man Monitor check nº $counter" "All hosts are online and responding, except: $opendns_failed_hosts"
@@ -36,13 +150,6 @@ then
 else
     notify-send --urgency=low --icon=notification-network-ethernet-connected "Poor's Man Monitor check nº $counter" "All hosts are online and responding. New checks will be done on every $delay seconds on: $targets"
 fi
-}
-
-clioutput ()
-{
-#Adiciona um timestamp ao echo. Forma padrão de stdout.
-time=$(date +%X)
-echo "($time) $*"
 }
 
 opendns_check () {
@@ -102,15 +209,6 @@ a number to this, we suggest calling it version 0.
 "
     exit 0
 fi
-#Definindo arquivo de configuração e checando se há permissão para leitura.
-config_file=~/.pomamonitor/pomamonitor.conf
-if test -r $config_file
-then
-    clioutput "Using the configuration file $config_file"
-else
-    clioutput "Configuration file not found. Exiting. Place it with reading privileges on $config_file"
-    exit 1
-fi
 #Injeta o código fonte do $config_file nesse script.
 . $config_file
 #Primeira checagem é feita em $brief_delay segundos.
@@ -140,7 +238,7 @@ do
     opendns_check
     clioutput "Performing check nº $counter"
     temporary=$(mktemp)
-    fping -dAmeu $targets > $temporary 2>&1
+    fping -dAmeu -T60 $targets > $temporary 2>&1
     if test $? != 0
     then
 #Se houver pelo menos um host offline:
