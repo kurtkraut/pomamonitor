@@ -1,6 +1,8 @@
 # pomamonitor #
 pomamonitor (Poor's Man Monitor) is a shell script that rely's on notify-send command to send alerts to Gnome/KDE/XFCE desktop user when a host or several hosts that was previously set to be monitored are offline. Pretty useful for small system administrators that doesn't need Nagios/Zabbix for monitoring such a small enviroment. Obviously, it supports IPv6: we are in 2014!
 
+Here a video sample of pomamonitor in action: http://www.youtube.com/watch?v=fhviYwsGrk8
+
 ## Why Poor's Man? ##
 A system administrator usually needs to monitor constantly the machines and system he is responsible for. This is often done by central monitoring systems, with several nodes like Nagios, Zabbix or Cacti. But this would require a central server to keep track of all uptime/downtime data, server's info like load average etc. A poor man (a ironic way to refer to a modest sysadmin) wouldn't have a central server to do such thing or even not too many hosts to care about. So the objective with this project is just to give a quick desktop alert to sysadmins that something is wrong with a server or network. Quick alerts can lead to quick responses and less downtime.
 
