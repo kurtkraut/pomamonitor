@@ -46,7 +46,7 @@ else
 fi
 if test -x $grep_path
 then
-    clioutput "Binary echo $grep_path found."
+    clioutput "Binary $grep_path found."
 else
     clioutput "Fatal error: grep is not installed or accessible. Poor's Man \
     Monitor needs access to grep."
