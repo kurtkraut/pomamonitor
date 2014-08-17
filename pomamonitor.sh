@@ -30,7 +30,7 @@ host_path=$(whereis -b host | cut -d" " -f 2)
 zenity_path=$(whereis -b zenity | cut -d" " -f 2)
 if test -x $mktemp_path
 then
-    clioutput "Binary $mktemp_path will be used."
+    clioutput "Binary $mktemp_path found."
 else
     clioutput "Fatal error: mktemp is not installed or accessible. Poor's Man \
     Monitor needs access to mktemp."
@@ -38,7 +38,7 @@ else
 fi
 if test -x $fping_path
 then
-    clioutput "Binary $fping_path will be used."
+    clioutput "Binary $fping_path found."
 else
     clioutput "Fatal error: fping is not installed or accessible. Poor's Man \
     Monitor needs access to fping."
@@ -46,7 +46,7 @@ else
 fi
 if test -x $grep_path
 then
-    clioutput "Binary echo $grep_path will be used."
+    clioutput "Binary echo $grep_path found."
 else
     clioutput "Fatal error: grep is not installed or accessible. Poor's Man \
     Monitor needs access to grep."
@@ -54,7 +54,7 @@ else
 fi
 if test -x $notify_send_path
 then
-    clioutput "Binary $notify_send_path will be used."
+    clioutput "Binary $notify_send_path found."
 else
     clioutput "Fatal error: notify-send is not installed or accessible. Poor's \
     Man Monitor needs access a binary called 'notify-send'."
@@ -62,7 +62,7 @@ else
 fi
 if test -x $host_path
 then
-    clioutput "Binary $host_path will be used."
+    clioutput "Binary $host_path found."
 else
     clioutput "Fatal error: host is not installed or accessible. Poor's Man \
     Monitor needs access to a binary called 'host'."
@@ -70,7 +70,7 @@ else
 fi
 if test -x $zenity_path
 then
-    clioutput "Binary $zenity_path will be used."
+    clioutput "Binary $zenity_path found."
 else
     clioutput "Fatal error: host is not installed or accessible. Poor's Man \
     Monitor needs access to zenity."
