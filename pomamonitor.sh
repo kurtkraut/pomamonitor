@@ -32,84 +32,105 @@ if test -x $mktemp_path
 then
     clioutput "Binary $mktemp_path will be used."
 else
-    clioutput "Fatal error: mktemp is not installed or accessible. Poor's Man Monitor needs access to mktemp."
+    clioutput "Fatal error: mktemp is not installed or accessible. Poor's Man \
+    Monitor needs access to mktemp."
     exit 1
 fi
 if test -x $fping_path
 then
     clioutput "Binary $fping_path will be used."
 else
-    clioutput "Fatal error: fping is not installed or accessible. Poor's Man Monitor needs access to fping."
+    clioutput "Fatal error: fping is not installed or accessible. Poor's Man \
+    Monitor needs access to fping."
     exit 1
 fi
 if test -x $grep_path
 then
     clioutput "Binary echo $grep_path will be used."
 else
-    clioutput "Fatal error: grep is not installed or accessible. Poor's Man Monitor needs access to grep."
+    clioutput "Fatal error: grep is not installed or accessible. Poor's Man \
+    Monitor needs access to grep."
     exit 1
 fi
 if test -x $notify_send_path
 then
     clioutput "Binary $notify_send_path will be used."
 else
-    clioutput "Fatal error: notify-send is not installed or accessible. Poor's Man Monitor needs access a binary called 'notify-send'."
+    clioutput "Fatal error: notify-send is not installed or accessible. Poor's \
+    Man Monitor needs access a binary called 'notify-send'."
     exit 1
 fi
 if test -x $host_path
 then
     clioutput "Binary $host_path will be used."
 else
-    clioutput "Fatal error: host is not installed or accessible. Poor's Man Monitor needs access to a binary called 'host'."
+    clioutput "Fatal error: host is not installed or accessible. Poor's Man \
+    Monitor needs access to a binary called 'host'."
     exit 1
 fi
 if test -x $zenity_path
 then
     clioutput "Binary $zenity_path will be used."
 else
-    clioutput "Fatal error: host is not installed or accessible. Poor's Man Monitor needs access to zenity."
+    clioutput "Fatal error: host is not installed or accessible. Poor's Man \
+    Monitor needs access to zenity."
     exit 1
 fi
 #Checking if zenity was aborted
 zenity_error_check(){
 if test $? -eq 1
 then
-    zenity --error --text="You've cancelled the Poor's Man Monitor first run settings. You need to complete this process in order to use Poor's Man Monitor. You may run this later."
+    zenity --error --text="You've cancelled the Poor's Man Monitor first run \
+    settings. You need to complete this process in order to use Poor's Man Monitor. You may run this later."
     exit 1
 fi
 }
 #Creating conf file is non-existant
 zenity_conf_maker(){
-zenity --title="Read before using Poor's Man Monitor" --question --text="This is the first time you run Poor's Man Monitor. In order to make it run, you will need to answer 3 questions:\\
+zenity --title="Read before using Poor's Man Monitor" --question --text="This \
+is the first time you run Poor's Man Monitor. In order to make it run, you \
+will need to answer 3 questions:\\
 \\
 1) All hosts or IPs you want to monitor, separated by space.\\
-2) The delay (in minutes) between each check if a host in the item 1 is online or offline.\\
-3) If a host is detected as offline, a briefer delay between each check on item 2.\\
+2) The delay (in minutes) between each check if a host in the item 1 is online \
+or offline.\\
+3) If a host is detected as offline, a briefer delay between each check on \
+item 2.\\
 \\
-Please note that each question will be done in a different window.If you are not ready to answer these questions, you should cancel this window and run Poor's Man Monitor later.\\
+Please note that each question will be done in a different window.If you are \
+not ready to answer these questions, you should cancel this window and run \
+Poor's Man Monitor later.\\
 \\
 If you are ready to answer then just click on OK."
 if test $? -eq 1
 then
     exit 0
 fi
-targets=$(zenity --title="Setting targets" --entry --text="Put below the hosts or IP addresses you want to monitor if they are offline,\\
+targets=$(zenity --title="Setting targets" --entry --text="Put below the hosts \
+   or IP addresses you want to monitor if they are offline,\\
 separated by a single space. It is recommended to keep at least 3 reliable\\
 hosts in the list that are usually online and responding to pings.\\
 Three reliable targets are already filled for you as an example.\\
 \\
-You may enter up to hundreds of targets." --entry-text="www.google.com www.opendns.com www.registro.br")
+You may enter up to hundreds of targets." --entry-text="www.google.com \
+ww.opendns.com www.registro.br")
 zenity_error_check
-normal_delay=$(zenity --scale --title="Setting a delay" --text "We call a check when Poor's Man Monitor pings all targets that you have provided\\
-in the last question. Here you will set a delay (in minutes) between each check.\\
+normal_delay=$(zenity --scale --title="Setting a delay" --text "We call a \
+   check when Poor's Man Monitor pings all targets that you have provided\\
+in the last question. Here you will set a delay (in minutes) between each \
+check.\\
 \\
-A delay of 5 minutes is recommended." --min-value=3  --step 1 --value=5 --max-value=120)
+A delay of 5 minutes is recommended." --min-value=3  --step 1 --value=5 \
+--max-value=120)
 zenity_error_check
-brief_delay=$(zenity --scale --title="Setting a brief delay" --text "If a target is detected as offline, it is important to make briefer checks to\\
-be sure it is truly offline and to be alerted sooner when it is back online. Set\\
+brief_delay=$(zenity --scale --title="Setting a brief delay" --text "If a \
+   target is detected as offline, it is important to make briefer checks to\\
+be sure it is truly offline and to be alerted sooner when it is back online. \
+Set\\
 below a brief delay in minutes.\\
 \\
-A brief delay off 1 minute is recommended" --min-value=1  --step 1 --value=1 --max-value=$normal_delay)
+A brief delay off 1 minute is recommended" --min-value=1  --step 1 --value=1 \
+--max-value=$normal_delay)
 zenity_error_check
 #Converting minutes to seconds
 normal_delay=$(expr $normal_delay \* 60)
@@ -118,7 +139,9 @@ brief_delay=$(expr $brief_delay \* 60)
 echo "targets=\"$targets\"" > $config_file
 echo "normal_delay=$normal_delay" >> $config_file
 echo "brief_delay=$brief_delay" >> $config_file
-zenity --question --title="Poor's Man Monitor configuration finished." --text="You have finished configuring Poor's Man Monitor. If you want to change orr review the settings, just edit the file $config_file\\
+zenity --question --title="Poor's Man Monitor configuration finished." \
+--text="You have finished configuring Poor's Man Monitor. If you want to \
+change orr review the settings, just edit the file $config_file\\
 \\
 Now Poor's Man Monitor will be loaded."
 }
@@ -134,21 +157,34 @@ fi
 default_online_message(){
 if test -n "$opendns_failed_hosts"
 then
-    notify-send --urgency=low --icon=notification-network-ethernet-disconnected "Poor's Man Monitor check nº $counter" "All hosts are online and responding, except: $opendns_failed_hosts"
-    clioutput "All hosts are online and responding, except: $opendns_failed_hosts"
+    notify-send --urgency=low \
+    --icon=notification-network-ethernet-disconnected "Poor's Man Monitor \
+    check nº $counter" "All hosts are online and responding, except: \
+    $opendns_failed_hosts"
+    clioutput "All hosts are online and responding, except: \
+    $opendns_failed_hosts"
 else
-    notify-send --urgency=low --icon=notification-network-ethernet-connected "Poor's Man Monitor check nº $counter" "All $targets_qty hosts are online and responding. New checks will be done on every $delay seconds."
-    clioutput "All $targets_qty hosts are online and responding. New checks will be done on every $delay seconds."
+    notify-send --urgency=low --icon=notification-network-ethernet-connected \
+    "Poor's Man Monitor check nº $counter" "All $targets_qty hosts are online \
+    and responding. New checks will be done on every $delay seconds."
+    clioutput "All $targets_qty hosts are online and responding. New checks \
+    will be done on every $delay seconds."
 fi
 }
 
 nondefault_online_message(){
 if test -n "$opendns_failed_hosts"
 then
-    notify-send --urgency=low --icon=notification-network-ethernet-disconnected "Poor's Man Monitor check nº $counter" "All hosts are online and responding, except: $opendns_failed_hosts"
-    clioutput "All hosts are online and responding, except: $opendns_failed_hosts"
+    notify-send --urgency=low \
+    --icon=notification-network-ethernet-disconnected "Poor's Man Monitor \
+    check nº $counter" "All hosts are online and responding, except: \
+    $opendns_failed_hosts"
+    clioutput "All hosts are online and responding, except: \
+    $opendns_failed_hosts"
 else
-    notify-send --urgency=low --icon=notification-network-ethernet-connected "Poor's Man Monitor check nº $counter" "All hosts are online and responding. New checks will be done on every $delay seconds on: $targets"
+    notify-send --urgency=low --icon=notification-network-ethernet-connected \
+    "Poor's Man Monitor check nº $counter" "All hosts are online and \
+    responding. New checks will be done on every $delay seconds on: $targets"
 fi
 }
 
@@ -162,14 +198,21 @@ do
     host $line | grep --fixed-strings --silent "208.69.32.13"
     if test $? -eq 0
     then
-#The $delay is not changed to $brief_delay because hardly ever the current status will change in such brief time
+#The $delay is not changed to $brief_delay because hardly ever the current \
+status will change in such brief time
        opendns_failed_hosts="$line $opendns_failed_hosts"
     fi
 done < $temporary_opendns
 if test -n "$opendns_failed_hosts"
 then
-    notify-send --urgency=critical --icon=notification-network-ethernet-disconnected "Poor's Man Monitor" "Aparentely, some hosts does not exist or their DNS servers stopped responding. You have to check this situation manually for: $opendns_failed_hosts"
-   clioutput "Aparentely, some hosts does not exist or their DNS servers stopped responding. You have to check this situation manually for: $opendns_failed_hosts"
+    notify-send --urgency=critical \
+    --icon=notification-network-ethernet-disconnected "Poor's Man Monitor" \
+    "Aparentely, some hosts does not exist or their DNS servers stopped \
+    responding. You have to check this situation manually for: \
+    $opendns_failed_hosts"
+   clioutput "Aparentely, some hosts does not exist or their DNS servers \
+   stopped responding. You have to check this situation manually for: \
+   $opendns_failed_hosts"
 else
    clioutput "No host from target list seem to be handled by guide.opendns.com"
    fi
@@ -215,7 +258,8 @@ delay="$brief_delay"
 targets_qty=$(echo "$targets" | tr " " \\n | wc -l)
 clioutput "Poor's Man Monitor - Monitor activated"
 echo
-clioutput "If you need further details on how to use this software, please type $0 --help"
+clioutput "If you need further details on how to use this software, please \
+type $0 --help"
 echo
 if test -z $1
 then
@@ -230,7 +274,8 @@ do
     counter=$(expr $counter + 1)
     clioutput "Waiting $delay seconds to perform the check nº $counter."
     sleep $delay
-    clioutput "Checking if a target is being handled by guide.opendns.com to avoid false-negative."
+    clioutput "Checking if a target is being handled by guide.opendns.com \
+    to avoid false-negative."
     opendns_check
     clioutput "Performing check nº $counter"
     temporary=$(mktemp)
@@ -240,17 +285,22 @@ do
 #If there is at least one offline host:
         delay="$brief_delay"
         clioutput "At least one host seem to be offline on check nº $counter."
-        clioutput "The pause between each check was temporarily changed to $delay seconds."
+        clioutput "The pause between each check was temporarily changed to \
+        $delay seconds."
         results=$(cat $temporary)
         clioutput "Collected data:"
         cat $temporary
-        notify-send --urgency=critical --icon=notification-network-ethernet-disconnected "Offline hosts on check nº $counter" "$results"
+        notify-send --urgency=critical \
+        --icon=notification-network-ethernet-disconnected "Offline hosts on \
+        check nº $counter" "$results"
     else
 #If all hosts are online
         rm $temporary
         clioutput "All $targets_qty are online on check nº $counter."
-#If this is the first check or at least one host was offline in the previous check ($delay = $brief_delay), alert user that now all hosts are online
-        if test $counter -eq 1 -o $delay = $brief_delay -o -n "$opendns_failed_hosts" 
+#If this is the first check or at least one host was offline in the previous
+#check ($delay = $brief_delay), alert user that now all hosts are online
+        if test $counter -eq 1 -o $delay = $brief_delay -o -n \
+         "$opendns_failed_hosts" 
         then
             if test -z $1
             then
