@@ -17,11 +17,11 @@
 #
 clioutput ()
 {
-#Adiciona um timestamp ao echo. Forma padrão de stdout.
+#Add a timestamp to echo. Default way of stdout.
 time=$(date +%X)
 echo "($time) $*"
 }
-#Checando a existência dos binários que serão utilizados.
+#Checking the presence of dependencies
 mktemp_path=$(whereis -b mktemp | cut -d" " -f 2)
 fping_path=$(whereis -b fping | cut -d" " -f 2)
 grep_path=$(whereis -b grep | cut -d" " -f 2)
@@ -70,7 +70,7 @@ else
     clioutput "Fatal error: host is not installed or accessible. Poor's Man Monitor needs access to zenity."
     exit 1
 fi
-#Checando se zenity_conf_maker foi abortado
+#Checking if zenity was aborted
 zenity_error_check(){
 if test $? -eq 1
 then
@@ -78,7 +78,7 @@ then
     exit 1
 fi
 }
-#Criando arquivo de configuração caso ele não exista
+#Creating conf file is non-existant
 zenity_conf_maker(){
 zenity --title="Read before using Poor's Man Monitor" --question --text="This is the first time you run Poor's Man Monitor. In order to make it run, you will need to answer 3 questions:\\
 \\
@@ -111,10 +111,10 @@ below a brief delay in minutes.\\
 \\
 A brief delay off 1 minute is recommended" --min-value=1  --step 1 --value=1 --max-value=$normal_delay)
 zenity_error_check
-#Convertendo de minutos para segundos
+#Converting minutes to seconds
 normal_delay=$(expr $normal_delay \* 60)
 brief_delay=$(expr $brief_delay \* 60)
-#Gravando dados coletados no $config_file
+#Writing collected data to $config_file
 echo "targets=\"$targets\"" > $config_file
 echo "normal_delay=$normal_delay" >> $config_file
 echo "brief_delay=$brief_delay" >> $config_file
@@ -122,7 +122,7 @@ zenity --question --title="Poor's Man Monitor configuration finished." --text="Y
 \\
 Now Poor's Man Monitor will be loaded."
 }
-#Definindo arquivo de configuração e checando se há permissão para leitura.
+#Seting up conf file and checking for read permission
 config_file=~/.pomamonitor/pomamonitor.conf
 if test -r $config_file
 then
@@ -130,7 +130,7 @@ then
 else
     zenity_conf_maker
 fi
-#Alertas ao usuário
+#Alerts to user
 default_online_message(){
 if test -n "$opendns_failed_hosts"
 then
@@ -153,17 +153,16 @@ fi
 }
 
 opendns_check () {
-#Caso os servidores do OpenDNS.com sejam usados no sistema, isso gera falso-negativo pois ele responde com ping para alvos com DNS offline ou hosts inexistentes. Para evitar esses falsos-negativos, essa checagem é feita.
+#Avoiding false-positive alerts in the presence of OpenDNS servers
 temporary_opendns=$(mktemp)
 unset opendns_failed_hosts
 echo $targets | tr " " \\n > $temporary_opendns
 while read line
 do
-#Tentando detectar IPs de 208.69.32.130 a 208.69.32.139
     host $line | grep --fixed-strings --silent "208.69.32.13"
     if test $? -eq 0
     then
-#O $delay não é alterado para $brief_delay pois dificilmente esta situação mudará em tão pouco tempo.
+#The $delay is not changed to $brief_delay because hardly ever the current status will change in such brief time
        opendns_failed_hosts="$line $opendns_failed_hosts"
     fi
 done < $temporary_opendns
@@ -209,18 +208,15 @@ a number to this, we suggest calling it version 0.
 "
     exit 0
 fi
-#Injeta o código fonte do $config_file nesse script.
+#Injects the conf_file in this script
 . $config_file
-#Primeira checagem é feita em $brief_delay segundos.
+#First check is done in $brief_delay seconds
 delay="$brief_delay"
-#Conta quantos hosts tem em $targets
 targets_qty=$(echo "$targets" | tr " " \\n | wc -l)
-#Avisa ao usuário que o monitor está ativado.
 clioutput "Poor's Man Monitor - Monitor activated"
 echo
 clioutput "If you need further details on how to use this software, please type $0 --help"
 echo
-#Utiliza hosts indicados na sintaxe (quando oferecidos) e os exibe p/ o usuário
 if test -z $1
 then
     clioutput "Monitoring the default list of $targets_qty hosts: $targets"
@@ -228,7 +224,7 @@ else
     targets="$*"
     clioutput "Monitoring this list of $targets_qty hosts: $targets"
 fi
-#Loop de checagem dos hosts
+#Check up infinite loop
 while [ 1 ]
 do
     counter=$(expr $counter + 1)
@@ -241,7 +237,7 @@ do
     fping -dAmeu -T60 $targets > $temporary 2>&1
     if test $? != 0
     then
-#Se houver pelo menos um host offline:
+#If there is at least one offline host:
         delay="$brief_delay"
         clioutput "At least one host seem to be offline on check nº $counter."
         clioutput "The pause between each check was temporarily changed to $delay seconds."
@@ -250,10 +246,10 @@ do
         cat $temporary
         notify-send --urgency=critical --icon=notification-network-ethernet-disconnected "Offline hosts on check nº $counter" "$results"
     else
-#Se todos os hosts online:
+#If all hosts are online
         rm $temporary
         clioutput "All $targets_qty are online on check nº $counter."
-#Se for o primeiro teste ou algum host estava offline no último teste ($delay = $brief_delay), avisar via notify-send que está todos hosts estão online. Os hosts mantidos por guide.opendns.com também conduzirão até este trecho de código pois também respondem ping.
+#If this is the first check or at least one host was offline in the previous check ($delay = $brief_delay), alert user that now all hosts are online
         if test $counter -eq 1 -o $delay = $brief_delay -o -n "$opendns_failed_hosts" 
         then
             if test -z $1
